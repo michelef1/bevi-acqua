@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="theme-color" content="#0369A1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#071422" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Bevi Acqua - traccia la tua idratazione quotidiana">
+<title>Bevi Acqua</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<style>
+:root{
+  --bg:#F2F9FC;
+  --surface:#FFFFFF;
+  --surface-2:#EAF4FA;
+  --ink:#0B2540;
+  --muted:#5B7A94;
+  --border:rgba(11,37,64,0.08);
+  --water-1:#38BDF8;
+  --water-2:#0369A1;
+  --water-deep:#082F49;
+  --plant-1:#4ADE80;
+  --plant-2:#15803D;
+  --plant-sad:#94A3B8;
+  --sugar:#F59E0B;
+  --coffee:#92400E;
+  --danger:#EF4444;
+  --shadow:0 8px 24px rgba(3,105,161,0.12);
+  --radius:20px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#071422;
+    --surface:#0F2438;
+    --surface-2:#12304A;
+    --ink:#E6F4FB;
+    --muted:#8CA9BF;
+    --border:rgba(230,244,251,0.08);
+    --water-1:#38BDF8;
+    --water-2:#0EA5E9;
+    --water-deep:#041826;
+    --shadow:0 8px 28px rgba(0,0,0,0.45);
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overscroll-behavior-y:none;
+  padding-bottom:calc(78px + env(safe-area-inset-bottom));
+  transition:background .3s ease,color .3s ease;
+}
+.app{max-width:520px;margin:0 auto;padding:0 18px;}
+
+/* HEADER */
+header.top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(16px + env(safe-area-inset-top)) 18px 10px;
+  max-width:520px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-drop{width:30px;height:30px;flex:none;}
+.brand h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-0.02em;}
+.brand small{display:block;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+
+.menu-wrap{position:relative;}
+.menu-btn{
+  width:40px;height:40px;border-radius:12px;border:none;
+  background:var(--surface);box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink);
+}
+.menu-btn svg{width:20px;height:20px;}
+.menu-dropdown{
+  position:absolute;right:0;top:48px;background:var(--surface);
+  border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);
+  min-width:180px;overflow:hidden;z-index:50;
+  opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;
+  transition:all .15s ease;
+}
+.menu-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+.menu-dropdown button{
+  display:flex;align-items:center;gap:10px;width:100%;border:none;background:none;
+  padding:12px 14px;font-size:14px;color:var(--ink);text-align:left;cursor:pointer;font-weight:600;
+}
+.menu-dropdown button:hover{background:var(--surface-2);}
+.menu-dropdown button + button{border-top:1px solid var(--border);}
+
+/* TABS CONTENT */
+.view{display:none;animation:fadein .25s ease;}
+.view.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* HERO CARD */
+.hero{
+  background:linear-gradient(180deg,var(--surface) 0%, var(--surface) 100%);
+  border-radius:28px;padding:22px 18px 18px;box-shadow:var(--shadow);
+  border:1px solid var(--border);margin-top:6px;
+}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.hero-label{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.hero-pct{font-size:13px;font-weight:800;color:var(--water-2);}
+
+.stage{display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:8px 0 4px;}
+
+/* BOTTLE */
+.bottle-wrap{position:relative;width:118px;height:210px;flex:none;}
+svg.bottle{width:100%;height:100%;overflow:visible;}
+.bottle-liquid{transition:transform 1s cubic-bezier(.4,0,.2,1);}
+.wave{animation:wave-move 3.2s linear infinite;}
+@keyframes wave-move{from{transform:translateX(0);}to{transform:translateX(-120px);}}
+.bottle-readout{
+  position:absolute;left:0;right:0;top:44%;text-align:center;pointer-events:none;
+}
+.bottle-readout .ml{font-size:22px;font-weight:800;color:var(--water-deep);}
+@media (prefers-color-scheme:dark){.bottle-readout .ml{color:#fff;}}
+.bottle-readout .goal{font-size:10px;color:var(--muted);font-weight:700;}
+
+/* PLANT */
+.plant-wrap{width:76px;height:150px;flex:none;position:relative;display:flex;align-items:flex-end;justify-content:center;}
+.plant-mood{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  font-size:20px;
+}
+svg.plant{width:100%;height:100%;}
+.plant-stem, .plant-leaf, .plant-flower{transition:all .6s ease;}
+
+.status-row{
+  display:flex;justify-content:space-between;align-items:center;margin-top:16px;
+  padding-top:14px;border-top:1px dashed var(--border);
+}
+.status-msg{font-size:13px;color:var(--muted);font-weight:600;max-width:70%;}
+.streak-chip{
+  display:flex;align-items:center;gap:5px;background:var(--surface-2);
+  padding:6px 10px;border-radius:100px;font-size:12px;font-weight:800;color:var(--water-2);
+  white-space:nowrap;
+}
+
+/* QUICK ADD */
+.section-title{font-size:14px;font-weight:800;margin:22px 0 10px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;}
+.section-title span.hint{font-size:11px;color:var(--muted);font-weight:600;}
+
+.drink-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.drink-toggle button{
+  flex:1;border:1px solid var(--border);background:var(--surface);color:var(--muted);
+  padding:9px 4px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s ease;
+}
+.drink-toggle button.active{
+  border-color:transparent;color:#fff;
+  background:linear-gradient(135deg,var(--water-1),var(--water-2));
+  box-shadow:0 4px 12px rgba(3,105,161,0.3);
+}
+.drink-toggle button.active[data-type="coffee"]{background:linear-gradient(135deg,#B45309,var(--coffee));box-shadow:0 4px 12px rgba(146,64,14,.3);}
+.drink-toggle button.active[data-type="sugar"]{background:linear-gradient(135deg,#FBBF24,var(--sugar));box-shadow:0 4px 12px rgba(245,158,11,.3);}
+
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.quick-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;box-shadow:var(--shadow);color:var(--ink);
+  transition:transform .1s ease;
+}
+.quick-btn:active{transform:scale(.94);}
+.quick-btn svg{width:26px;height:26px;color:var(--water-2);}
+.quick-btn .qlabel{font-size:11px;font-weight:700;}
+.quick-btn .qml{font-size:10px;color:var(--muted);font-weight:600;}
+.quick-btn.custom{background:linear-gradient(135deg,var(--water-1),var(--water-2));color:#fff;border:none;}
+.quick-btn.custom svg{color:#fff;}
+.quick-btn.custom .qml{color:rgba(255,255,255,.85);}
+
+/* TODAY LOG */
+.log-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.log-empty{text-align:center;color:var(--muted);font-size:13px;font-weight:600;padding:22px 0;background:var(--surface);border-radius:16px;border:1px dashed var(--border);}
+.log-item{
+  display:flex;align-items:center;gap:12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:10px 12px;
+}
+.log-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--surface-2);}
+.log-icon svg{width:18px;height:18px;color:var(--water-2);}
+.log-main{flex:1;min-width:0;}
+.log-main .l1{font-size:13px;font-weight:700;}
+.log-main .l2{font-size:11px;color:var(--muted);font-weight:600;}
+.log-del{border:none;background:none;color:var(--muted);cursor:pointer;padding:6px;flex:none;}
+.log-del svg{width:16px;height:16px;}
+
+/* STATS */
+.stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+.stat-card .v{font-size:22px;font-weight:800;}
+.stat-card .l{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
+
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px 14px;margin-top:14px;box-shadow:var(--shadow);}
+.chart-title{font-size:13px;font-weight:800;margin-bottom:12px;}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;height:140px;gap:8px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+.bar-track{width:100%;max-width:26px;height:100%;background:var(--surface-2);border-radius:8px;display:flex;align-items:flex-end;overflow:hidden;position:relative;}
+.bar-fill{width:100%;border-radius:8px;background:linear-gradient(180deg,var(--water-1),var(--water-2));transition:height .6s ease;}
+.bar-fill.goal-hit{background:linear-gradient(180deg,var(--plant-1),var(--plant-2));}
+.bar-day{font-size:10px;font-weight:700;color:var(--muted);}
+
+/* SETTINGS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-top:12px;box-shadow:var(--shadow);}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:800;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.field input, .field select{
+  width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--ink);font-size:14px;font-weight:600;
+  font-family:inherit;
+}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+.segmented{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px;}
+.segmented button{
+  flex:1;border:none;background:none;padding:9px 4px;border-radius:9px;
+  font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;
+}
+.segmented button.active{background:var(--surface);color:var(--water-2);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.btn-primary{
+  width:100%;padding:13px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--water-1),var(--water-2));color:#fff;
+  font-weight:800;font-size:14px;cursor:pointer;margin-top:6px;
+}
+.btn-secondary{
+  width:100%;padding:12px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;margin-top:8px;
+}
+.notif-status{font-size:12px;font-weight:700;padding:8px 10px;border-radius:10px;background:var(--surface-2);color:var(--muted);margin-bottom:10px;}
+.notif-status.ok{color:var(--plant-2);}
+.notif-status.off{color:var(--danger);}
+
+/* BOTTOM NAV */
+nav.bottom{
+  position:fixed;left:0;right:0;bottom:0;background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+  display:flex;justify-content:center;gap:6px;z-index:40;
+}
+.nav-inner{display:flex;max-width:520px;width:100%;gap:6px;}
+nav.bottom button{
+  flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 0;color:var(--muted);cursor:pointer;border-radius:12px;
+}
+nav.bottom button svg{width:22px;height:22px;}
+nav.bottom button span{font-size:10px;font-weight:700;}
+nav.bottom button.active{color:var(--water-2);}
+
+/* MODALS */
+.overlay{
+  position:fixed;inset:0;background:rgba(3,20,34,.55);z-index:100;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s ease;
+}
+.overlay.open{opacity:1;pointer-events:auto;}
+.sheet{
+  background:var(--bg);width:100%;max-width:520px;border-radius:24px 24px 0 0;
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(30px);transition:transform .25s ease;
+  max-height:88vh;overflow-y:auto;
+}
+.overlay.open .sheet{transform:translateY(0);}
+.sheet.center{border-radius:24px;margin:0 16px;max-height:80vh;}
+.sheet-title{font-size:17px;font-weight:800;margin:0 0 4px;}
+.sheet-sub{font-size:13px;color:var(--muted);margin:0 0 16px;font-weight:600;}
+.sheet-close{
+  position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:10px;
+  background:var(--surface-2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+}
+.sheet{position:relative;}
+.close-x{position:absolute;top:16px;right:16px;}
+
+.guide-item{display:flex;gap:12px;margin-bottom:16px;}
+.guide-icon{width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex:none;}
+.guide-icon svg{width:18px;height:18px;color:var(--water-2);}
+.guide-text h4{margin:0 0 3px;font-size:13px;font-weight:800;}
+.guide-text p{margin:0;font-size:12px;color:var(--muted);font-weight:500;line-height:1.5;}
+
+.info-foot{text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+.info-foot p{margin:2px 0;font-size:12px;color:var(--muted);font-weight:700;}
+.info-foot .heart{color:#F87171;}
+
+.toast{
+  position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:100px;
+  font-size:13px;font-weight:700;z-index:200;opacity:0;transition:all .25s ease;pointer-events:none;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+input[type="number"]::-webkit-inner-spin-button{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <svg class="brand-drop" viewBox="0 0 24 24" fill="none">
+        <defs><linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#0369A1"/>
+        </linearGradient></defs>
+        <path d="M12 2C12 2 4 12.5 4 17a8 8 0 0016 0c0-4.5-8-15-8-15z" fill="url(#dropGrad)"/>
+      </svg>
+      <div>
+        <h1>Bevi Acqua</h1>
+        <small id="dateLabel">oggi</small>
+      </div>
+    </div>
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <div class="menu-dropdown" id="menuDropdown">
+        <button id="btnGuida">📘 Guida</button>
+        <button id="btnInfo">ℹ️ Info</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TAB: OGGI -->
+  <div class="view active" id="view-oggi">
+    <div class="hero">
+      <div class="hero-top">
+        <span class="hero-label">Idratazione di oggi</span>
+        <span class="hero-pct" id="heroPct">0%</span>
+      </div>
+      <div class="stage">
+        <div class="bottle-wrap">
+          <svg class="bottle" viewBox="0 0 118 210">
+            <defs>
+              <clipPath id="bottleClip">
+                <path d="M42 6 h34 v22 c0 4 8 6 8 16 v148 a12 12 0 01-12 12 H46 a12 12 0 01-12-12 V44 c0-10 8-12 8-16 z"/>
+              </clipPath>
+              <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--water-1)"/>
+                <stop offset="100%" stop-color="var(--water-2)"/>
+              </linearGradient>
+            </defs>
+            <path d="M42 6 h34 v22 c0 4 8 6 8 16 v148 a12 12 0 01-12 12 H46 a12 12 0 01-12-12 V44 c0-10 8-12 8-16 z"
+              fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+            <g clip-path="url(#bottleClip)">
+              <g class="bottle-liquid" id="bottleLiquid" style="transform:translateY(210px)">
+                <rect class="wave" x="-20" y="0" width="260" height="210" fill="url(#liquidGrad)"/>
+              </g>
+            </g>
+            <path d="M42 6 h34 v22 c0 4 8 6 8 16 v148 a12 12 0 01-12 12 H46 a12 12 0 01-12-12 V44 c0-10 8-12 8-16 z"
+              fill="none" stroke="var(--border)" stroke-width="2"/>
+            <rect x="47" y="0" width="24" height="10" rx="3" fill="var(--muted)" opacity="0.5"/>
+          </svg>
+          <div class="bottle-readout">
+            <div class="ml" id="mlReadout">0<span style="font-size:12px;">ml</span></div>
+            <div class="goal" id="goalReadout">/ 2000ml</div>
+          </div>
+        </div>
+        <div class="plant-wrap">
+          <div class="plant-mood" id="plantMood">🌱</div>
+          <svg class="plant" viewBox="0 0 76 150">
+            <ellipse cx="38" cy="140" rx="24" ry="7" fill="var(--surface-2)"/>
+            <path d="M22 140 L26 112 a12 12 0 0124 0 L54 140 Z" fill="#B45309" opacity="0.85"/>
+            <path d="M24 112 h28" stroke="#92400E" stroke-width="2" opacity="0.6"/>
+            <line class="plant-stem" id="plantStem" x1="38" y1="112" x2="38" y2="112" stroke="var(--plant-2)" stroke-width="4" stroke-linecap="round"/>
+            <path class="plant-leaf" id="plantLeafL" d="M38 112 Q38 112 38 112" fill="var(--plant-1)" opacity="0"/>
+            <path class="plant-leaf" id="plantLeafR" d="M38 112 Q38 112 38 112" fill="var(--plant-1)" opacity="0"/>
+            <circle class="plant-flower" id="plantFlower" cx="38" cy="112" r="0" fill="#FBCFE8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="status-msg" id="statusMsg">Inizia a bere per riempire la borraccia 💧</div>
+        <div class="streak-chip" id="streakChip">🔥 0</div>
+      </div>
+    </div>
+
+    <div class="section-title">Aggiungi bevanda <span class="hint" id="factorHint">100% idratazione</span></div>
+    <div class="drink-toggle">
+      <button class="active" data-type="water">💧 Acqua</button>
+      <button data-type="coffee">☕ Caffè/Tè</button>
+      <button data-type="sugar">🥤 Zuccherata</button>
+    </div>
+    <div class="quick-grid">
+      <button class="quick-btn" data-ml="250">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3h8l1 4-2 13a1 1 0 01-1 1H10a1 1 0 01-1-1L7 7z"/><path d="M7.5 9h9"/></svg>
+        <span class="qlabel">Bicchiere</span><span class="qml">250 ml</span>
+      </button>
+      <button class="quick-btn" data-ml="330">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l-1 5v10a3 3 0 01-3 3H9a3 3 0 01-3-3V8z"/><path d="M17 6h2a2 2 0 012 2v2a2 2 0 01-2 2h-1"/></svg>
+        <span class="qlabel">Tazza</span><span class="qml">330 ml</span>
+      </button>
+      <button class="quick-btn" data-ml="500">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6v3l2 3v11a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-3z"/><path d="M7 12h10"/></svg>
+        <span class="qlabel">Borraccia</span><span class="qml">500 ml</span>
+      </button>
+      <button class="quick-btn custom" id="btnCustom">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="qlabel">Libero</span><span class="qml">ml</span>
+      </button>
+    </div>
+
+    <div class="section-title">Registro di oggi</div>
+    <div class="log-list" id="logList"></div>
+  </div>
+
+  <!-- TAB: STATISTICHE -->
+  <div class="view" id="view-stats">
+    <div class="stat-cards">
+      <div class="stat-card"><div class="v" id="statStreak">0</div><div class="l">Giorni di fila</div></div>
+      <div class="stat-card"><div class="v" id="statAvg">0 ml</div><div class="l">Media 7 giorni</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Ultimi 7 giorni</div>
+      <div class="bars" id="barsChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Riepilogo</div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Giorni target raggiunto (ultimi 7)</label>
+        <div id="statHits" style="font-size:14px;font-weight:800;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: IMPOSTAZIONI -->
+  <div class="view" id="view-settings">
+    <div class="card">
+      <h3>Profilo</h3>
+      <div class="field">
+        <label>Sesso</label>
+        <div class="segmented" id="segSesso">
+          <button data-v="uomo" class="active">Uomo</button>
+          <button data-v="donna">Donna</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Peso (kg)</label>
+          <input type="number" id="inputPeso" placeholder="70" min="30" max="200">
+        </div>
+        <div class="field">
+          <label>Attività fisica</label>
+          <select id="inputAttivita">
+            <option value="basso">Bassa</option>
+            <option value="medio" selected>Media</option>
+            <option value="alto">Alta</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" id="btnRicalcola">Ricalcola obiettivo</button>
+      <div class="field" style="margin-top:14px;">
+        <label>Obiettivo giornaliero (ml) — modificabile manualmente</label>
+        <input type="number" id="inputGoal" min="500" max="6000" step="50">
+      </div>
+      <button class="btn-secondary" id="btnSalvaGoal">Salva obiettivo</button>
+    </div>
+
+    <div class="card">
+      <h3>Promemoria</h3>
+      <div class="notif-status" id="notifStatus">Notifiche non attivate</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Sveglia</label>
+          <input type="time" id="inputWake" value="07:30">
+        </div>
+        <div class="field">
+          <label>Andare a dormire</label>
+          <input type="time" id="inputSleep" value="23:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Promemoria ogni</label>
+        <select id="inputInterval">
+          <option value="1">1 ora</option>
+          <option value="1.5" selected>1,5 ore</option>
+          <option value="2">2 ore</option>
+          <option value="3">3 ore</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="btnAttivaNotif">Attiva promemoria</button>
+    </div>
+
+    <div class="card">
+      <h3>Dati</h3>
+      <button class="btn-secondary" id="btnResetOggi">Azzera i dati di oggi</button>
+      <button class="btn-secondary" id="btnResetAll" style="color:var(--danger);">Cancella tutti i dati</button>
+    </div>
+  </div>
+
+  <nav class="bottom">
+    <div class="nav-inner">
+      <button class="active" data-view="oggi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 4 12.5 4 17a8 8 0 0016 0c0-4.5-8-15-8-15z"/></svg>
+        <span>Oggi</span>
+      </button>
+      <button data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+        <span>Statistiche</span>
+      </button>
+      <button data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V21a2 2 0 01-4 0v-.09A1.7 1.7 0 008.5 19.4a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.56-1.03H2a2 2 0 010-4h.09A1.7 1.7 0 003.6 8.5a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.34H8a1.7 1.7 0 001.03-1.56V2a2 2 0 014 0v.09a1.7 1.7 0 001.03 1.56 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06a1.7 1.7 0 00-.34 1.87V8a1.7 1.7 0 001.56 1.03H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.51 1.97z"/></svg>
+        <span>Impostazioni</span>
+      </button>
+    </div>
+  </nav>
+
+</div>
+
+<!-- MODAL: ONBOARDING -->
+<div class="overlay" id="overlayOnboard">
+  <div class="sheet center">
+    <p class="sheet-title">Benvenuto 👋</p>
+    <p class="sheet-sub">Rispondi a 3 domande per calcolare il tuo obiettivo di idratazione ideale.</p>
+    <div class="field">
+      <label>Sesso</label>
+      <div class="segmented" id="obSesso">
+        <button data-v="uomo" class="active">Uomo</button>
+        <button data-v="donna">Donna</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Peso (kg)</label>
+      <input type="number" id="obPeso" placeholder="es. 72" min="30" max="200">
+    </div>
+    <div class="field">
+      <label>Livello di attività fisica</label>
+      <div class="segmented" id="obAttivita">
+        <button data-v="basso">Bassa</button>
+        <button data-v="medio" class="active">Media</button>
+        <button data-v="alto">Alta</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnOnboardStart">Calcola il mio obiettivo</button>
+  </div>
+</div>
+
+<!-- MODAL: CUSTOM ML -->
+<div class="overlay" id="overlayCustom">
+  <div class="sheet">
+    <button class="menu-btn close-x" id="closeCustom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <p class="sheet-title">Quantità libera</p>
+    <p class="sheet-sub">Inserisci i millilitri bevuti</p>
+    <div class="field">
+      <label>Millilitri</label>
+      <input type="number" id="customMlInput" placeholder="es. 200" min="10" max="2000" autofocus>
+    </div>
+    <button class="btn-primary" id="btnCustomAdd">Aggiungi</button>
+  </div>
+</div>
+
+<!-- MODAL: GUIDA -->
+<div class="overlay" id="overlayGuida">
+  <div class="sheet">
+    <button class="menu-btn close-x" id="closeGuida"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <p class="sheet-title">Guida rapida</p>
+    <div class="guide-item">
+      <div class="guide-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6v3l2 3v11a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-3z"/></svg></div>
+      <div class="guide-text"><h4>Aggiungi bevande</h4><p>Tocca un pulsante rapido (Bicchiere, Tazza, Borraccia) oppure "Libero" per inserire una quantità personalizzata. Scegli prima il tipo di bevanda: acqua, caffè/tè o zuccherata, perché l'apporto idrico effettivo cambia.</p></div>
+    </div>
+    <div class="guide-item">
+      <div class="guide-icon">🌱</div>
+      <div class="guide-text"><h4>La piantina</h4><p>Cresce e fiorisce man mano che ti avvicini all'obiettivo (25%, 50%, 75%, 100%). Se sei indietro rispetto all'orario, appassisce leggermente: è il tuo promemoria visivo.</p></div>
+    </div>
+    <div class="guide-item">
+      <div class="guide-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></div>
+      <div class="guide-text"><h4>Statistiche</h4><p>Nella scheda Statistiche trovi il grafico degli ultimi 7 giorni e la striscia (streak) di giorni consecutivi in cui hai raggiunto l'obiettivo.</p></div>
+    </div>
+    <div class="guide-item">
+      <div class="guide-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="guide-text"><h4>Impostazioni</h4><p>Ricalcola il tuo obiettivo cambiando peso o attività, oppure impostalo manualmente. Attiva i promemoria impostando l'orario di sveglia, quello in cui vai a dormire e l'intervallo tra un avviso e l'altro: non riceverai notifiche mentre dormi.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: INFO -->
+<div class="overlay" id="overlayInfo">
+  <div class="sheet">
+    <button class="menu-btn close-x" id="closeInfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <p class="sheet-title">Informazioni</p>
+    <p class="sheet-sub">Bevi Acqua — traccia la tua idratazione quotidiana con obiettivi personalizzati, promemoria intelligenti e una piantina che cresce con te.</p>
+    <div class="field">
+      <label>Versione</label>
+      <div style="font-size:14px;font-weight:700;">1.0.0</div>
+    </div>
+    <div class="field">
+      <label>Dati</label>
+      <div style="font-size:13px;font-weight:600;color:var(--muted);">Tutti i dati restano sul tuo dispositivo (LocalStorage). Nessuna informazione viene inviata online.</div>
+    </div>
+    <div class="info-foot">
+      <p>App creata da Miki <span class="heart">by Claude</span></p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+/* ---------- STORAGE ---------- */
+const STORE_KEY = 'beviacqua_data_v1';
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {
+    profile:{sesso:'uomo',peso:null,attivita:'medio',goal:2000,onboarded:false},
+    settings:{wake:'07:30',sleep:'23:00',interval:1.5,notifOn:false,lastNotif:0},
+    log:{}
+  };
+}
+function saveData(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+let data = loadData();
+
+function todayKey(d=new Date()){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function ensureToday(){
+  const k = todayKey();
+  if(!data.log[k]) data.log[k] = [];
+  return k;
+}
+
+/* ---------- GOAL CALC ---------- */
+function calcGoal(peso, sesso, attivita){
+  peso = parseFloat(peso) || 70;
+  let base = peso * 35;
+  if(sesso === 'uomo') base += 100;
+  const bonus = {basso:0, medio:300, alto:600}[attivita] || 0;
+  return Math.round((base + bonus)/10)*10;
+}
+
+/* ---------- HYDRATION FACTORS ---------- */
+const FACTORS = {water:1, coffee:0.7, sugar:0.5};
+const FACTOR_LABELS = {water:'100% idratazione', coffee:'70% idratazione', sugar:'50% idratazione'};
+const DRINK_LABELS = {water:'Acqua', coffee:'Caffè/Tè', sugar:'Bevanda zuccherata'};
+let currentType = 'water';
+
+/* ---------- TOAST ---------- */
+let toastTimer;
+function showToast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+/* ---------- NAV ---------- */
+$$('nav.bottom button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    $$('nav.bottom button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    $$('.view').forEach(v=>v.classList.remove('active'));
+    $('#view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='stats') renderStats();
+    if(btn.dataset.view==='settings') fillSettingsForm();
+  });
+});
+
+/* ---------- MENU ---------- */
+$('#menuBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  $('#menuDropdown').classList.toggle('open');
+});
+document.addEventListener('click', ()=> $('#menuDropdown').classList.remove('open'));
+$('#btnGuida').addEventListener('click', ()=> openOverlay('overlayGuida'));
+$('#btnInfo').addEventListener('click', ()=> openOverlay('overlayInfo'));
+
+function openOverlay(id){ $('#'+id).classList.add('open'); }
+function closeOverlay(id){ $('#'+id).classList.remove('open'); }
+$('#closeGuida').addEventListener('click', ()=>closeOverlay('overlayGuida'));
+$('#closeInfo').addEventListener('click', ()=>closeOverlay('overlayInfo'));
+$('#closeCustom').addEventListener('click', ()=>closeOverlay('overlayCustom'));
+['overlayGuida','overlayInfo','overlayCustom'].forEach(id=>{
+  $('#'+id).addEventListener('click', e=>{ if(e.target.id===id) closeOverlay(id); });
+});
+
+/* ---------- ONBOARDING ---------- */
+function initOnboarding(){
+  if(data.profile.onboarded) return;
+  openOverlay('overlayOnboard');
+}
+$('#obSesso').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  $$('#obSesso button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+});
+$('#obAttivita').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  $$('#obAttivita button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+});
+$('#btnOnboardStart').addEventListener('click', ()=>{
+  const peso = $('#obPeso').value;
+  if(!peso || peso < 30){ showToast('Inserisci un peso valido'); return; }
+  const sesso = $('#obSesso').querySelector('.active').dataset.v;
+  const attivita = $('#obAttivita').querySelector('.active').dataset.v;
+  data.profile = {sesso, peso:parseFloat(peso), attivita, goal:calcGoal(peso,sesso,attivita), onboarded:true};
+  saveData();
+  closeOverlay('overlayOnboard');
+  renderAll();
+  showToast('Obiettivo calcolato: '+data.profile.goal+' ml');
+});
+
+/* ---------- DRINK TYPE TOGGLE ---------- */
+$('.drink-toggle').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  $$('.drink-toggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentType = btn.dataset.type;
+  $('#factorHint').textContent = FACTOR_LABELS[currentType];
+});
+
+/* ---------- ADD DRINK ---------- */
+function addDrink(ml, type){
+  const k = ensureToday();
+  const effective = Math.round(ml * FACTORS[type]);
+  data.log[k].push({time: Date.now(), ml, type, effective});
+  saveData();
+  renderAll();
+  const pct = Math.round((getTodayTotal()/getGoal())*100);
+  if(pct>=100 && (pct-Math.round(((getTodayTotal()-effective)/getGoal())*100))<100){
+    showToast('🎉 Obiettivo raggiunto! Ottimo lavoro');
+  } else {
+    showToast('+'+effective+' ml aggiunti');
+  }
+}
+$$('.quick-btn[data-ml]').forEach(btn=>{
+  btn.addEventListener('click', ()=> addDrink(parseInt(btn.dataset.ml), currentType));
+});
+$('#btnCustom').addEventListener('click', ()=>{
+  $('#customMlInput').value='';
+  openOverlay('overlayCustom');
+  setTimeout(()=>$('#customMlInput').focus(),200);
+});
+$('#btnCustomAdd').addEventListener('click', ()=>{
+  const v = parseInt($('#customMlInput').value);
+  if(!v || v<=0){ showToast('Inserisci un valore valido'); return; }
+  addDrink(v, currentType);
+  closeOverlay('overlayCustom');
+});
+
+/* ---------- GETTERS ---------- */
+function getGoal(){ return data.profile.goal || 2000; }
+function getTodayTotal(){
+  const k = todayKey();
+  const entries = data.log[k] || [];
+  return entries.reduce((s,e)=>s+e.effective,0);
+}
+
+/* ---------- RENDER: HERO / BOTTLE / PLANT ---------- */
+function renderHero(){
+  const total = getTodayTotal();
+  const goal = getGoal();
+  const pct = Math.max(0, Math.min(100, Math.round((total/goal)*100)));
+  $('#heroPct').textContent = pct+'%';
+  $('#mlReadout').innerHTML = total+'<span style="font-size:12px;">ml</span>';
+  $('#goalReadout').textContent = '/ '+goal+'ml';
+
+  // bottle wave: translateY from 210 (empty) to 0 (full), height area ~200
+  const fillPx = 208 * (pct/100);
+  const liquid = $('#bottleLiquid');
+  liquid.style.transform = 'translateY('+(208-fillPx)+'px)';
+
+  // plant growth stages
+  const stem = $('#plantStem'), leafL = $('#plantLeafL'), leafR = $('#plantLeafR'), flower = $('#plantFlower');
+  let stemLen = 0, leafOpacity = 0, flowerR = 0;
+  if(pct>=25){ stemLen = 20; }
+  if(pct>=50){ stemLen = 45; leafOpacity = 1; }
+  if(pct>=75){ stemLen = 65; leafOpacity = 1; }
+  if(pct>=100){ stemLen = 80; leafOpacity = 1; flowerR = 8; }
+  const topY = 112 - stemLen;
+  stem.setAttribute('y1', 112); stem.setAttribute('y2', topY);
+  leafL.setAttribute('d', `M38 ${topY+18} Q20 ${topY+10} 30 ${topY-2} Q40 ${topY+2} 38 ${topY+18}`);
+  leafL.style.opacity = leafOpacity;
+  leafR.setAttribute('d', `M38 ${topY+30} Q56 ${topY+22} 46 ${topY+10} Q36 ${topY+14} 38 ${topY+30}`);
+  leafR.style.opacity = leafOpacity;
+  flower.setAttribute('cx', 38); flower.setAttribute('cy', topY);
+  flower.setAttribute('r', flowerR);
+
+  // mood based on pace vs time of day
+  const now = new Date();
+  const wake = timeToMinutes(data.settings.wake||'07:30');
+  const sleep = timeToMinutes(data.settings.sleep||'23:00');
+  const nowMin = now.getHours()*60+now.getMinutes();
+  let expectedPct = 100;
+  if(sleep>wake && nowMin>wake && nowMin<sleep){
+    expectedPct = Math.round(((nowMin-wake)/(sleep-wake))*100);
+  } else if(nowMin<=wake){ expectedPct = 0; }
+
+  let mood = '🌱', statusMsg = 'Inizia a bere per riempire la borraccia 💧';
+  if(pct>=100){ mood='🌸'; statusMsg='Obiettivo raggiunto! Piantina felice 🎉'; }
+  else if(pct >= expectedPct - 10){ mood='🌿'; statusMsg='Sei in linea con la tabella di marcia, continua così!'; }
+  else if(pct >= expectedPct - 30){ mood='🍃'; statusMsg='Sei un po\' indietro, bevi un bicchiere d\'acqua!'; }
+  else if(nowMin>wake){ mood='🥀'; statusMsg='La piantina ha sete... recupera un po\' di acqua!'; }
+  $('#plantMood').textContent = mood;
+  $('#statusMsg').textContent = statusMsg;
+
+  $('#streakChip').textContent = '🔥 '+computeStreak();
+}
+function timeToMinutes(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+
+/* ---------- RENDER: LOG LIST ---------- */
+const TYPE_ICON = {
+  water:'<path d="M9 2h6v3l2 3v11a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-3z"/>',
+  coffee:'<path d="M6 3h9l-1 5v10a3 3 0 01-3 3H9a3 3 0 01-3-3V8z"/><path d="M17 6h2a2 2 0 012 2v2a2 2 0 01-2 2h-1"/>',
+  sugar:'<path d="M8 3h8l1 4-2 13a1 1 0 01-1 1H10a1 1 0 01-1-1L7 7z"/>'
+};
+function renderLog(){
+  const k = todayKey();
+  const entries = (data.log[k]||[]).slice().reverse();
+  const list = $('#logList');
+  if(entries.length===0){
+    list.innerHTML = '<div class="log-empty">Ancora nessuna bevuta oggi</div>';
+    return;
+  }
+  list.innerHTML = entries.map((e,idx)=>{
+    const realIdx = (data.log[k].length-1-idx);
+    const time = new Date(e.time);
+    const hh = String(time.getHours()).padStart(2,'0')+':'+String(time.getMinutes()).padStart(2,'0');
+    return `<div class="log-item">
+      <div class="log-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${TYPE_ICON[e.type]}</svg></div>
+      <div class="log-main">
+        <div class="l1">${DRINK_LABELS[e.type]} · ${e.ml} ml</div>
+        <div class="l2">${hh} · effettivi ${e.effective} ml</div>
+      </div>
+      <button class="log-del" data-idx="${realIdx}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.log-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const k = todayKey();
+      data.log[k].splice(parseInt(btn.dataset.idx),1);
+      saveData();
+      renderAll();
+    });
+  });
+}
+
+/* ---------- STREAK ---------- */
+function computeStreak(){
+  let streak = 0;
+  let d = new Date();
+  // if today not yet complete, start counting from yesterday
+  const todayTotal = getTodayTotal();
+  if(todayTotal < getGoal()){
+    d.setDate(d.getDate()-1);
+  }
+  for(let i=0;i<365;i++){
+    const k = todayKey(d);
+    const entries = data.log[k];
+    const total = entries ? entries.reduce((s,e)=>s+e.effective,0) : 0;
+    if(total >= getGoal() && total>0){
+      streak++;
+      d.setDate(d.getDate()-1);
+    } else break;
+  }
+  return streak;
+}
+
+/* ---------- STATS VIEW ---------- */
+function renderStats(){
+  const days = [];
+  const dnames = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+  let sum = 0, hits = 0;
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const k = todayKey(d);
+    const entries = data.log[k] || [];
+    const total = entries.reduce((s,e)=>s+e.effective,0);
+    sum += total;
+    if(total >= getGoal() && total>0) hits++;
+    days.push({label:dnames[d.getDay()], total});
+  }
+  $('#statStreak').textContent = computeStreak();
+  $('#statAvg').textContent = Math.round(sum/7)+' ml';
+  $('#statHits').textContent = hits+' / 7 giorni';
+
+  const maxVal = Math.max(getGoal(), ...days.map(d=>d.total), 1);
+  $('#barsChart').innerHTML = days.map(d=>{
+    const h = Math.max(3, Math.round((d.total/maxVal)*130));
+    const hit = d.total >= getGoal() && d.total>0;
+    return `<div class="bar-col">
+      <div class="bar-track"><div class="bar-fill ${hit?'goal-hit':''}" style="height:${h}px"></div></div>
+      <div class="bar-day">${d.label}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- SETTINGS ---------- */
+function fillSettingsForm(){
+  $$('#segSesso button').forEach(b=>b.classList.toggle('active', b.dataset.v===data.profile.sesso));
+  $('#inputPeso').value = data.profile.peso || '';
+  $('#inputAttivita').value = data.profile.attivita || 'medio';
+  $('#inputGoal').value = getGoal();
+  $('#inputWake').value = data.settings.wake;
+  $('#inputSleep').value = data.settings.sleep;
+  $('#inputInterval').value = data.settings.interval;
+  updateNotifStatusUI();
+}
+$('#segSesso').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  $$('#segSesso button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+});
+$('#btnRicalcola').addEventListener('click', ()=>{
+  const peso = $('#inputPeso').value;
+  if(!peso || peso<30){ showToast('Inserisci un peso valido'); return; }
+  const sesso = $('#segSesso').querySelector('.active').dataset.v;
+  const attivita = $('#inputAttivita').value;
+  data.profile.sesso = sesso; data.profile.peso = parseFloat(peso); data.profile.attivita = attivita;
+  data.profile.goal = calcGoal(peso, sesso, attivita);
+  saveData();
+  $('#inputGoal').value = data.profile.goal;
+  renderAll();
+  showToast('Obiettivo ricalcolato: '+data.profile.goal+' ml');
+});
+$('#btnSalvaGoal').addEventListener('click', ()=>{
+  const g = parseInt($('#inputGoal').value);
+  if(!g || g<500){ showToast('Obiettivo non valido'); return; }
+  data.profile.goal = g;
+  saveData();
+  renderAll();
+  showToast('Obiettivo salvato: '+g+' ml');
+});
+$('#btnResetOggi').addEventListener('click', ()=>{
+  if(!confirm('Azzerare i dati di oggi?')) return;
+  data.log[todayKey()] = [];
+  saveData(); renderAll();
+  showToast('Dati di oggi azzerati');
+});
+$('#btnResetAll').addEventListener('click', ()=>{
+  if(!confirm('Cancellare TUTTI i dati salvati? L\'azione non è reversibile.')) return;
+  localStorage.removeItem(STORE_KEY);
+  data = loadData();
+  renderAll();
+  fillSettingsForm();
+  showToast('Tutti i dati sono stati cancellati');
+});
+
+/* ---------- NOTIFICATIONS ---------- */
+function updateNotifStatusUI(){
+  const el = $('#notifStatus');
+  if(!('Notification' in window)){
+    el.textContent = 'Notifiche non supportate su questo browser';
+    el.className='notif-status off';
+    return;
+  }
+  if(Notification.permission==='granted' && data.settings.notifOn){
+    el.textContent = 'Promemoria attivi tra le '+data.settings.wake+' e le '+data.settings.sleep;
+    el.className='notif-status ok';
+  } else if(Notification.permission==='denied'){
+    el.textContent = 'Notifiche bloccate dal browser';
+    el.className='notif-status off';
+  } else {
+    el.textContent = 'Promemoria non attivi';
+    el.className='notif-status';
+  }
+}
+$('#btnAttivaNotif').addEventListener('click', async ()=>{
+  data.settings.wake = $('#inputWake').value;
+  data.settings.sleep = $('#inputSleep').value;
+  data.settings.interval = parseFloat($('#inputInterval').value);
+  if(!('Notification' in window)){
+    showToast('Notifiche non supportate su questo dispositivo');
+    saveData(); return;
+  }
+  const perm = await Notification.requestPermission();
+  data.settings.notifOn = perm==='granted';
+  saveData();
+  updateNotifStatusUI();
+  showToast(perm==='granted' ? 'Promemoria attivati 🔔' : 'Permesso negato');
+});
+function checkReminder(){
+  if(!data.settings.notifOn || Notification.permission!=='granted') return;
+  const now = new Date();
+  const nowMin = now.getHours()*60+now.getMinutes();
+  const wake = timeToMinutes(data.settings.wake||'07:30');
+  const sleep = timeToMinutes(data.settings.sleep||'23:00');
+  const inWindow = sleep>wake ? (nowMin>=wake && nowMin<=sleep) : (nowMin>=wake || nowMin<=sleep);
+  if(!inWindow) return;
+  const last = data.settings.lastNotif || 0;
+  const intervalMs = (data.settings.interval||1.5) * 3600 * 1000;
+  if(Date.now() - last >= intervalMs){
+    const total = getTodayTotal(), goal = getGoal();
+    if(total < goal){
+      try{
+        new Notification('💧 Bevi Acqua', {
+          body: 'Ricordati di bere! Sei a '+total+'/'+goal+' ml oggi.',
+          icon: './icons/icon-192.png'
+        });
+      }catch(e){}
+      data.settings.lastNotif = Date.now();
+      saveData();
+    }
+  }
+}
+setInterval(checkReminder, 60*1000);
+
+/* ---------- RENDER ALL ---------- */
+function renderAll(){
+  renderHero();
+  renderLog();
+}
+$('#dateLabel').textContent = new Date().toLocaleDateString('it-IT',{weekday:'long', day:'numeric', month:'long'});
+
+initOnboarding();
+renderAll();
+
+/* ---------- SERVICE WORKER ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
