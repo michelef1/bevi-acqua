@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bevi-acqua-v9';
+const CACHE_NAME = 'bevi-acqua-v10';
 const ASSETS = [
   './',
   './index.html',
