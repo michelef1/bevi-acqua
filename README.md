@@ -1,6 +1,6 @@
 Informazioni
 
-Bevi Acqua — traccia la tua idratazione quotidiana con obiettivi personalizzati, promemoria intelligenti e una piantina che cresce con te.
+Bevi Acqua — app PWA,traccia la tua idratazione quotidiana con obiettivi personalizzati, promemoria intelligenti e una piantina che cresce con te.
 
 Versione
 1.0.0
